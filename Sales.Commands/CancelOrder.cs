@@ -2,7 +2,7 @@
 
 namespace Sales.Commands
 {
-    public class PlaceOrder : ICommand
+    public class CancelOrder : ICommand
     {
         public int OrderId { get; set; }
     }

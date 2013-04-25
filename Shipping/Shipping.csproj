@@ -54,6 +54,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ShippingSaga.cs" />
     <Compile Include="ShippingSagaData.cs" />
+    <Compile Include="Startup.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -67,6 +68,14 @@
     <ProjectReference Include="..\Sales.Events\Sales.Events.csproj">
       <Project>{06DE7FE1-D04A-4754-94C4-2EF622C1D3BF}</Project>
       <Name>Sales.Events</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Shipping.Commands\Shipping.Commands.csproj">
+      <Project>{EFDC571B-851A-4F4B-A312-39312B878864}</Project>
+      <Name>Shipping.Commands</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Shipping.Events\Shipping.Events.csproj">
+      <Project>{46C3BD2E-C155-4445-94F3-6544506E907A}</Project>
+      <Name>Shipping.Events</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

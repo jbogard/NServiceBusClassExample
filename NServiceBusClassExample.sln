@@ -28,6 +28,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shipping", "Shipping\Shippi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Billing.Events", "Billing.Events\Billing.Events.csproj", "{9661DED5-7643-4AD6-88D3-C8D471F7CEEC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shipping.Events", "Shipping.Events\Shipping.Events.csproj", "{46C3BD2E-C155-4445-94F3-6544506E907A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shipping.Commands", "Shipping.Commands\Shipping.Commands.csproj", "{EFDC571B-851A-4F4B-A312-39312B878864}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -74,6 +78,14 @@ Global
 		{9661DED5-7643-4AD6-88D3-C8D471F7CEEC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9661DED5-7643-4AD6-88D3-C8D471F7CEEC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9661DED5-7643-4AD6-88D3-C8D471F7CEEC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{46C3BD2E-C155-4445-94F3-6544506E907A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{46C3BD2E-C155-4445-94F3-6544506E907A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{46C3BD2E-C155-4445-94F3-6544506E907A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{46C3BD2E-C155-4445-94F3-6544506E907A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EFDC571B-851A-4F4B-A312-39312B878864}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EFDC571B-851A-4F4B-A312-39312B878864}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EFDC571B-851A-4F4B-A312-39312B878864}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EFDC571B-851A-4F4B-A312-39312B878864}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

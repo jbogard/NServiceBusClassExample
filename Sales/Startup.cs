@@ -10,11 +10,24 @@ namespace Sales
 
         public void Start()
         {
+            int i = 0;
             while (true)
             {
-                Console.WriteLine("Enter customer ID:");
-                int customerId = Convert.ToInt32(Console.ReadLine());
-                Bus.SendLocal<PlaceOrder>(m => m.CustomerId = customerId);
+                Console.WriteLine("Enter P to place and C to cancel an order...");
+                var line = Console.ReadLine();
+                switch (line)
+                {
+                    case "P":
+                        i++;
+                        Console.WriteLine("Your order number is: " + i);
+                        Bus.SendLocal(new PlaceOrder { OrderId = i });
+                        break;
+                    case "C":
+                        Console.Write("Enter order to cancel: ");
+                        var order = Console.ReadLine();
+                        Bus.SendLocal(new CancelOrder { OrderId = Convert.ToInt32(order) });
+                        break;
+                }
             }
         }
 

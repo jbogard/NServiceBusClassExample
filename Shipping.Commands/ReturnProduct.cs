@@ -1,8 +1,8 @@
 ﻿using NServiceBus;
 
-namespace Sales.Commands
+namespace Shipping.Commands
 {
-    public class PlaceOrder : ICommand
+    public class ReturnProduct : ICommand
     {
         public int OrderId { get; set; }
     }

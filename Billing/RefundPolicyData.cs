@@ -1,9 +1,9 @@
 ﻿using System;
 using NServiceBus.Saga;
 
-namespace Shipping
+namespace Billing
 {
-    public class ShippingSagaData : IContainSagaData
+    public class RefundPolicyData : IContainSagaData
     {
         public Guid Id { get; set; }
         public string Originator { get; set; }
@@ -11,10 +11,11 @@ namespace Shipping
 
         [Unique]
         public int OrderId { get; set; }
-        public bool OrderAccepted { get; set; }
-        public bool OrderBilled { get; set; }
-        public bool OrderShipped { get; set; }
+
         public bool OrderCancelled { get; set; }
+
+        public bool ShippingCancelled { get; set; }
+
         public bool ProductReturned { get; set; }
     }
 }

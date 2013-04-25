@@ -1,8 +1,8 @@
 ﻿using NServiceBus;
 
-namespace Sales.Commands
+namespace Shipping.Events
 {
-    public class PlaceOrder : ICommand
+    public class ShippingCancelled : IEvent
     {
         public int OrderId { get; set; }
     }
