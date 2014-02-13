@@ -9,6 +9,7 @@ namespace Shipping
         public string Originator { get; set; }
         public string OriginalMessageId { get; set; }
 
+        [Unique]
         public int OrderId { get; set; }
         public bool OrderAccepted { get; set; }
         public bool OrderBilled { get; set; }

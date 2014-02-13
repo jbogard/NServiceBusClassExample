@@ -11,16 +11,15 @@ namespace Billing
 
         public void Start()
         {
-            int orderId = 1;
             while (true)
             {
                 Console.Write("Enter order ID:");
+                int orderId = Convert.ToInt32(Console.ReadLine());
 
                 Bus.Publish<OrderBilled>(m =>
                 {
-                    m.OrderId = orderId++;
+                    m.OrderId = orderId;
                 });
-                Thread.Sleep(200);
 
                 Console.WriteLine("Order billed. " + orderId);
             }

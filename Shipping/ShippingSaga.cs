@@ -5,10 +5,12 @@ using Sales.Events;
 
 namespace Shipping
 {
+    using NServiceBus;
+
     public class ShippingSaga
         : Saga<ShippingSagaData>,
-        IAmStartedByMessages<OrderAccepted>,
-        IAmStartedByMessages<OrderBilled>
+        IHandleMessages<OrderAccepted>,
+        IHandleMessages<OrderBilled>
     {
         public override void ConfigureHowToFindSaga()
         {
