@@ -28,7 +28,7 @@ namespace Shipping
                 .ToSaga(m => m.OrderId);
         }
 
-        public void Handle(OrderAccepted message)
+        public void Handle (OrderAccepted message)
         {
             LogManager.GetLogger(typeof(ShippingSaga))
                 .Info("Received Order Accepted: " + message.OrderId);
