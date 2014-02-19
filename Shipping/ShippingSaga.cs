@@ -9,6 +9,8 @@ using Shipping.Events;
 
 namespace Shipping
 {
+    using NServiceBus;
+
     public class ShippingSaga
         : Saga<ShippingSagaData>,
         IAmStartedByMessages<OrderAccepted>,
