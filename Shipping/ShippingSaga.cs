@@ -9,8 +9,8 @@ namespace Shipping
 
     public class ShippingSaga
         : Saga<ShippingSagaData>,
-        IHandleMessages<OrderAccepted>,
-        IHandleMessages<OrderBilled>
+        IAmStartedByMessages<OrderAccepted>,
+        IAmStartedByMessages<OrderBilled>
     {
         public override void ConfigureHowToFindSaga()
         {
