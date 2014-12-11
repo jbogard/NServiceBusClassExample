@@ -13,11 +13,11 @@ namespace Billing
         IAmStartedByMessages<ProductReturned>
     {
 
-        public override void ConfigureHowToFindSaga()
+        protected override void ConfigureHowToFindSaga(SagaPropertyMapper<RefundPolicyData> mapper)
         {
-            ConfigureMapping<OrderCancelled>(s => s.OrderId).ToSaga(m => m.OrderId);
-            ConfigureMapping<ShippingCancelled>(s => s.OrderId).ToSaga(m => m.OrderId);
-            ConfigureMapping<ProductReturned>(s => s.OrderId).ToSaga(m => m.OrderId);
+            mapper.ConfigureMapping<OrderCancelled>(s => s.OrderId).ToSaga(m => m.OrderId);
+            mapper.ConfigureMapping<ShippingCancelled>(s => s.OrderId).ToSaga(m => m.OrderId);
+            mapper.ConfigureMapping<ProductReturned>(s => s.OrderId).ToSaga(m => m.OrderId);
         }
 
         public void Handle(OrderCancelled message)

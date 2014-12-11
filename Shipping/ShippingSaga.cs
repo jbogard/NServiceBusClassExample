@@ -18,16 +18,17 @@ namespace Shipping
         IAmStartedByMessages<OrderCancelled>,
         IHandleMessages<ReturnProduct>
     {
-        public override void ConfigureHowToFindSaga()
+        protected override void ConfigureHowToFindSaga(
+            SagaPropertyMapper<ShippingSagaData> mapper)
         {
-            ConfigureMapping<OrderAccepted>(s => s.OrderId)
+            mapper.ConfigureMapping<OrderCancelled>(s => s.OrderId)
                 .ToSaga(m => m.OrderId);
-            ConfigureMapping<OrderBilled>(s => s.OrderId)
+            mapper.ConfigureMapping<ReturnProduct>(s => s.OrderId)
                 .ToSaga(m => m.OrderId);
-            ConfigureMapping<OrderCancelled>(s => s.OrderId)
-                .ToSaga(m => m.OrderId);
-            ConfigureMapping<ReturnProduct>(s => s.OrderId)
-                .ToSaga(m => m.OrderId);
+            mapper.ConfigureMapping<OrderAccepted>(m => m.OrderId)
+                .ToSaga(s => s.OrderId);
+            mapper.ConfigureMapping<OrderBilled>(m => m.OrderId)
+                .ToSaga(s => s.OrderId);
         }
 
         public void Handle (OrderAccepted message)

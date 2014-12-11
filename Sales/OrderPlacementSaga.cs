@@ -13,9 +13,9 @@ namespace Sales
         IHandleMessages<CancelOrder>,
         IHandleTimeouts<OrderReadyToBePlaced>
     {
-        public override void ConfigureHowToFindSaga()
+        protected override void ConfigureHowToFindSaga(SagaPropertyMapper<OrderPlacementData> mapper)
         {
-            ConfigureMapping<CancelOrder>(s => s.OrderId).ToSaga(m => m.OrderId);
+            mapper.ConfigureMapping<CancelOrder>(s => s.OrderId).ToSaga(m => m.OrderId);
         }
 
         public void Handle(PlaceOrder message)
