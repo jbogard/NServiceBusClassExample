@@ -5,6 +5,8 @@ using Sales.Events;
 
 namespace Shipping
 {
+    using NServiceBus;
+
     public class ShippingSaga
         : Saga<ShippingSagaData>,
         IAmStartedByMessages<OrderAccepted>,
@@ -13,10 +15,10 @@ namespace Shipping
         protected override void ConfigureHowToFindSaga(
             SagaPropertyMapper<ShippingSagaData> mapper)
         {
-            mapper.ConfigureMapping<OrderAccepted>(s => s.OrderId)
-                .ToSaga(m => m.OrderId);
-            mapper.ConfigureMapping<OrderBilled>(s => s.OrderId)
-                .ToSaga(m => m.OrderId);
+            mapper.ConfigureMapping<OrderAccepted>(m => m.OrderId)
+                .ToSaga(s => s.OrderId);
+            mapper.ConfigureMapping<OrderBilled>(m => m.OrderId)
+                .ToSaga(s => s.OrderId);
         }
 
         public void Handle(OrderAccepted message)
