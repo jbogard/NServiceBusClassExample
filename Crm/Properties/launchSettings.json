@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Crm": {
+      "commandName": "Executable",
+      "executablePath": "$(ProjectDir)$(OutputPath)NServiceBus.Host.exe"
+    }
+  }
+}

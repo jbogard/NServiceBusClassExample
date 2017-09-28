@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Pricing": {
+      "commandName": "Executable",
+      "executablePath": "$(ProjectDir)$(OutputPath)NServiceBus.Host.exe"
+    }
+  }
+}
