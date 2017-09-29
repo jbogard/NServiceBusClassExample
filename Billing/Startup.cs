@@ -1,32 +1,33 @@
 ﻿using System;
-using System.Threading;
+using System.Threading.Tasks;
 using Billing.Events;
 using NServiceBus;
 
 namespace Billing
 {
-    public class Startup : IWantToRunWhenBusStartsAndStops
+    public class Startup : IWantToRunWhenEndpointStartsAndStops
     {
-        public IBus Bus { get; set; }
-
-        public void Start()
+        public Task Start(IMessageSession session)
         {
-            while (true)
+            Task.Run(async () =>
             {
-                Console.Write("Enter order ID:");
-                int orderId = Convert.ToInt32(Console.ReadLine());
-
-                Bus.Publish<OrderBilled>(m =>
+                while (true)
                 {
-                    m.OrderId = orderId;
-                });
+                    Console.Write("Enter order ID:");
+                    int orderId = Convert.ToInt32(Console.ReadLine());
 
-                Console.WriteLine("Order billed. " + orderId);
-            }
+                    await session.Publish<OrderBilled>(m =>
+                    {
+                        m.OrderId = orderId;
+                    });
+
+                    Console.WriteLine("Order billed. " + orderId);
+                }
+            });
+
+            return Task.CompletedTask;
         }
 
-        public void Stop()
-        {
-        }
+        public Task Stop(IMessageSession session) => Task.CompletedTask;
     }
 }

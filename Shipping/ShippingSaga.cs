@@ -1,87 +1,78 @@
-﻿using System;
-using Billing.Events;
-using NServiceBus;
+﻿using Billing.Events;
 using NServiceBus.Logging;
-using NServiceBus.Saga;
 using Sales.Events;
 using Shipping.Commands;
 using Shipping.Events;
+using System.Threading.Tasks;
+using NServiceBus.Persistence.Sql;
 
 namespace Shipping
 {
     using NServiceBus;
 
     public class ShippingSaga
-        : Saga<ShippingSagaData>,
+        : SqlSaga<ShippingSaga.SagaData>,
         IAmStartedByMessages<OrderAccepted>,
         IAmStartedByMessages<OrderBilled>,
         IAmStartedByMessages<OrderCancelled>,
         IHandleMessages<ReturnProduct>
     {
-        protected override void ConfigureHowToFindSaga(
-            SagaPropertyMapper<ShippingSagaData> mapper)
+        protected override void ConfigureMapping(IMessagePropertyMapper mapper)
         {
-            mapper.ConfigureMapping<OrderCancelled>(s => s.OrderId)
-                .ToSaga(m => m.OrderId);
-            mapper.ConfigureMapping<ReturnProduct>(s => s.OrderId)
-                .ToSaga(m => m.OrderId);
-            mapper.ConfigureMapping<OrderAccepted>(m => m.OrderId)
-                .ToSaga(s => s.OrderId);
-            mapper.ConfigureMapping<OrderBilled>(m => m.OrderId)
-                .ToSaga(s => s.OrderId);
+            mapper.ConfigureMapping<OrderAccepted>(m => m.OrderId);
+            mapper.ConfigureMapping<OrderBilled>(m => m.OrderId);
+            mapper.ConfigureMapping<OrderCancelled>(m => m.OrderId);
+            mapper.ConfigureMapping<ReturnProduct>(m => m.OrderId);
         }
 
-        public void Handle (OrderAccepted message)
+        protected override string CorrelationPropertyName => nameof(SagaData.OrderId);
+
+        public Task Handle(OrderAccepted message, IMessageHandlerContext context)
         {
             LogManager.GetLogger(typeof(ShippingSaga))
                 .Info("Received Order Accepted: " + message.OrderId);
 
-            Data.OrderId = message.OrderId;
             Data.OrderAccepted = true;
-            CheckIfComplete();
+            return CheckIfComplete(context);
         }
 
-        public void Handle(OrderBilled message)
+        public Task Handle(OrderBilled message, IMessageHandlerContext context)
         {
             LogManager.GetLogger(typeof(ShippingSaga))
                 .Info("Received Order Billed: " + message.OrderId);
 
-            Data.OrderId = message.OrderId;
             Data.OrderBilled = true;
-            CheckIfComplete();
+            return CheckIfComplete(context);
         }
 
-        public void Handle(OrderCancelled message)
+        public Task Handle(OrderCancelled message, IMessageHandlerContext context)
         {
-            Data.OrderId = message.OrderId;
             Data.OrderCancelled = true;
 
             LogManager.GetLogger(typeof(ShippingSaga))
                 .Info("Shipping cancelled. " + message.OrderId);
-            CheckIfComplete();
+            return CheckIfComplete(context);
         }
 
-
-        public void Handle(ReturnProduct message)
+        public Task Handle(ReturnProduct message, IMessageHandlerContext context)
         {
             Data.ProductReturned = true;
             LogManager.GetLogger(typeof(ShippingSaga))
                 .Info("Product Returned: " + message.OrderId);
-            CheckIfComplete();
+            return CheckIfComplete(context);
         }
 
-
-        private void CheckIfComplete()
+        private async Task CheckIfComplete(IMessageHandlerContext context)
         {
             if (Data.OrderCancelled)
             {
                 if (Data.OrderShipped && Data.ProductReturned)
                 {
-                    Bus.Publish<ProductReturned>(msg => msg.OrderId = Data.OrderId);
+                    await context.Publish<ProductReturned>(msg => msg.OrderId = Data.OrderId);
                 }
                 else if (!Data.OrderShipped)
                 {
-                    Bus.Publish<ShippingCancelled>(msg => msg.OrderId = Data.OrderId);
+                    await context.Publish<ShippingCancelled>(msg => msg.OrderId = Data.OrderId);
                 }
                 return;
             }
@@ -93,5 +84,16 @@ namespace Shipping
                 Data.OrderShipped = true;
             }
         }
+
+        public class SagaData : ContainSagaData
+        {
+            public int OrderId { get; set; }
+            public bool OrderAccepted { get; set; }
+            public bool OrderBilled { get; set; }
+            public bool OrderShipped { get; set; }
+            public bool ProductReturned { get; set; }
+            public bool OrderCancelled { get; set; }
+        }
+
     }
 }

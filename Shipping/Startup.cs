@@ -1,26 +1,29 @@
 ﻿using System;
+using System.Threading.Tasks;
 using NServiceBus;
 using Shipping.Commands;
 
 namespace Shipping
 {
-    public class Startup : IWantToRunWhenBusStartsAndStops
+    public class Startup : IWantToRunWhenEndpointStartsAndStops
     {
-        public IBus Bus { get; set; }
-
-        public void Start()
+        public Task Start(IMessageSession session)
         {
-            while (true)
+            Task.Run(async () =>
             {
-                Console.Write("Enter shipping product returned: ");
-                int orderId = Convert.ToInt32(Console.ReadLine());
+                while (true)
+                {
+                    Console.Write("Enter shipping product returned: ");
+                    int orderId = Convert.ToInt32(Console.ReadLine());
 
-                Bus.SendLocal(new ReturnProduct { OrderId = orderId });
-            }
+                    await session.SendLocal(new ReturnProduct { OrderId = orderId });
+                }
+            });
+
+            return Task.CompletedTask;
         }
 
-        public void Stop()
-        {
-        }
+        public Task Stop(IMessageSession session) => Task.CompletedTask;
+
     }
 }

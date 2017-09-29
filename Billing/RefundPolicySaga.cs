@@ -1,47 +1,49 @@
 ﻿using System;
+using System.Threading.Tasks;
+using NServiceBus;
 using NServiceBus.Logging;
-using NServiceBus.Saga;
+using NServiceBus.Sagas;
+using NServiceBus.Persistence.Sql;
 using Sales.Events;
 using Shipping.Events;
+using Billing.Events;
 
 namespace Billing
 {
     public class RefundPolicySaga
-        : Saga<RefundPolicyData>,
+        : SqlSaga<RefundPolicySaga.SagaData>,
         IAmStartedByMessages<OrderCancelled>,
         IAmStartedByMessages<ShippingCancelled>,
         IAmStartedByMessages<ProductReturned>
     {
-
-        protected override void ConfigureHowToFindSaga(SagaPropertyMapper<RefundPolicyData> mapper)
+        protected override void ConfigureMapping(IMessagePropertyMapper mapper)
         {
-            mapper.ConfigureMapping<OrderCancelled>(s => s.OrderId).ToSaga(m => m.OrderId);
-            mapper.ConfigureMapping<ShippingCancelled>(s => s.OrderId).ToSaga(m => m.OrderId);
-            mapper.ConfigureMapping<ProductReturned>(s => s.OrderId).ToSaga(m => m.OrderId);
+            mapper.ConfigureMapping<OrderCancelled>(m => m.OrderId);
+            mapper.ConfigureMapping<ShippingCancelled>(m => m.OrderId);
+            mapper.ConfigureMapping<ProductReturned>(m => m.OrderId);
         }
 
-        public void Handle(OrderCancelled message)
+        protected override string CorrelationPropertyName => nameof(SagaData.OrderId);
+
+        public Task Handle(OrderCancelled message, IMessageHandlerContext context)
         {
-            Data.OrderId = message.OrderId;
             Data.OrderCancelled = true;
-            CheckRefund();
+            return CheckRefund();
         }
 
-        public void Handle(ShippingCancelled message)
+        public Task Handle(ShippingCancelled message, IMessageHandlerContext context)
         {
-            Data.OrderId = message.OrderId;
             Data.ShippingCancelled = true;
-            CheckRefund();
+            return CheckRefund();
         }
 
-        public void Handle(ProductReturned message)
+        public Task Handle(ProductReturned message, IMessageHandlerContext context)
         {
-            Data.OrderId = message.OrderId;
             Data.ProductReturned = true;
-            CheckRefund();
+            return CheckRefund();
         }
 
-        private void CheckRefund()
+        private Task CheckRefund()
         {
             // Can also implement partial refunds here
             if (Data.OrderCancelled && (Data.ShippingCancelled || Data.ProductReturned))
@@ -50,6 +52,19 @@ namespace Billing
                     .Info("Refund issued for order " + Data.OrderId);
                 MarkAsComplete();
             }
+            return Task.CompletedTask;
         }
+
+        public class SagaData : ContainSagaData
+        {
+            public int OrderId { get; set; }
+
+            public bool OrderCancelled { get; set; }
+
+            public bool ShippingCancelled { get; set; }
+
+            public bool ProductReturned { get; set; }
+        }
+
     }
 }

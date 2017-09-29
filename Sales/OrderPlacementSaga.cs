@@ -1,33 +1,37 @@
 ﻿using System;
+using System.Threading.Tasks;
 using NServiceBus;
 using NServiceBus.Logging;
-using NServiceBus.Saga;
+using NServiceBus.Sagas;
+using NServiceBus.Persistence.Sql;
 using Sales.Commands;
 using Sales.Events;
 
 namespace Sales
 {
     public class OrderPlacementSaga
-        : Saga<OrderPlacementData>,
+        : SqlSaga<OrderPlacementSaga.SagaData>,
         IAmStartedByMessages<PlaceOrder>,
         IHandleMessages<CancelOrder>,
-        IHandleTimeouts<OrderReadyToBePlaced>
+        IHandleTimeouts<OrderPlacementSaga.OrderReadyToBePlaced>
     {
-        protected override void ConfigureHowToFindSaga(SagaPropertyMapper<OrderPlacementData> mapper)
+        protected override void ConfigureMapping(IMessagePropertyMapper mapper)
         {
-            mapper.ConfigureMapping<CancelOrder>(s => s.OrderId).ToSaga(m => m.OrderId);
+            mapper.ConfigureMapping<PlaceOrder>(m => m.OrderId);
+            mapper.ConfigureMapping<CancelOrder>(m => m.OrderId);
         }
 
-        public void Handle(PlaceOrder message)
+        protected override string CorrelationPropertyName => nameof(SagaData.OrderId);
+
+        public async Task Handle(PlaceOrder message, IMessageHandlerContext context)
         {
-            Data.OrderId = message.OrderId;
-            RequestTimeout<OrderReadyToBePlaced>(TimeSpan.FromSeconds(30));
+            await RequestTimeout<OrderReadyToBePlaced>(context, TimeSpan.FromSeconds(30));
 
             LogManager.GetLogger(typeof (OrderPlacementSaga))
                       .Info("Place Order request received " + Data.OrderId);
         }
 
-        public void Handle(CancelOrder message)
+        public async Task Handle(CancelOrder message, IMessageHandlerContext context)
         {
             if (Data.OrderCancelled)
                 return;
@@ -35,25 +39,35 @@ namespace Sales
             Data.OrderCancelled = true;
             if (Data.OrderAccepted)
             {
-                Bus.Publish<OrderCancelled>(msg => msg.OrderId = message.OrderId);
+                await context.Publish<OrderCancelled>(msg => msg.OrderId = message.OrderId);
             }
             LogManager.GetLogger(typeof(OrderPlacementSaga))
                       .Info("Order Cancelled " + Data.OrderId);
         }
 
-        public void Timeout(OrderReadyToBePlaced state)
+        public async Task Timeout(OrderReadyToBePlaced state, IMessageHandlerContext context)
         {
             if (!Data.OrderCancelled)
             {
-                Bus.Publish<OrderAccepted>(msg => msg.OrderId = Data.OrderId);
+                await context.Publish<OrderAccepted>(msg => msg.OrderId = Data.OrderId);
                 Data.OrderAccepted = true;
                 LogManager.GetLogger(typeof(OrderPlacementSaga))
                           .Info("Order Accepted " + Data.OrderId);
             }
         }
+
+        public class SagaData : ContainSagaData
+        {
+            public int OrderId { get; set; }
+
+            public bool OrderCancelled { get; set; }
+
+            public bool OrderAccepted { get; set; }
+        }
+
+        public class OrderReadyToBePlaced
+        {
+        }
     }
 
-    public class OrderReadyToBePlaced
-    {
-    }
 }

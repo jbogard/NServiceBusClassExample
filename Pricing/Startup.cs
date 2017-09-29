@@ -1,25 +1,28 @@
 ﻿using System;
+using System.ComponentModel;
+using System.Threading.Tasks;
 using NServiceBus;
 using Pricing.Events;
 
 namespace Pricing
 {
-    public class Startup : IWantToRunWhenBusStartsAndStops
+    public class Startup : IWantToRunWhenEndpointStartsAndStops
     {
-        public IBus Bus { get; set; }
-
-        public void Start()
+        public Task Start(IMessageSession session)
         {
-            while (true)
+            Task.Run(async () =>
             {
-                Console.WriteLine("Enter product ID:");
-                int productId = Convert.ToInt32(Console.ReadLine());
-                Bus.Publish<ProductPricingUpdated>(m => m.ProductId = productId);
-            }
+                while (true)
+                {
+                    Console.WriteLine("Enter product ID:");
+                    int productId = Convert.ToInt32(Console.ReadLine());
+                    await session.Publish<ProductPricingUpdated>(m => m.ProductId = productId);
+                }
+            });
+
+            return Task.CompletedTask;
         }
 
-        public void Stop()
-        {
-        }
+        public Task Stop(IMessageSession session) => Task.CompletedTask;
     }
 }
