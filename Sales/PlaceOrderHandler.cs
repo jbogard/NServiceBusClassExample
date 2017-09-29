@@ -1,4 +1,5 @@
-﻿using NServiceBus;
+﻿using System.Threading.Tasks;
+using NServiceBus;
 using NServiceBus.Logging;
 using Sales.Commands;
 using Sales.Events;
@@ -7,13 +8,12 @@ namespace Sales
 {
     public class PlaceOrderHandler : IHandleMessages<PlaceOrder>
     {
-        public IBus Bus { get; set; }
-        private static int OrderId;
+        private static int OrderId = 1;
 
-        public void Handle(PlaceOrder message)
+        public Task Handle(PlaceOrder message, IMessageHandlerContext context)
         {
             LogManager.GetLogger(GetType()).Info("Received Place Order");
-            Bus.Publish<OrderAccepted>(m => m.OrderId = OrderId++);
+            return context.Publish<OrderAccepted>(m => m.OrderId = OrderId++);
         }
     }
 }

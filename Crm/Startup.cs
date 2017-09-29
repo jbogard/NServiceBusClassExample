@@ -1,25 +1,27 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Crm.Events;
 using NServiceBus;
 
 namespace Crm
 {
-    public class Startup : IWantToRunWhenBusStartsAndStops
+    public class Startup : IWantToRunWhenEndpointStartsAndStops
     {
-        public IBus Bus { get; set; }
-
-        public void Start()
+        public Task Start(IMessageSession session)
         {
-            while (true)
+            Task.Run(async () =>
             {
-                Console.WriteLine("Enter customer ID:");
-                int customerId = Convert.ToInt32(Console.ReadLine());
-                Bus.Publish<CustomerStatusUpdated>(m => m.CustomerId = customerId);
-            }
+                while (true)
+                {
+                    Console.WriteLine("Enter customer ID:");
+                    int customerId = Convert.ToInt32(Console.ReadLine());
+                    await session.Publish<CustomerStatusUpdated>(m => m.CustomerId = customerId);
+                }
+            });
+
+            return Task.CompletedTask;
         }
 
-        public void Stop()
-        {
-        }
+        public Task Stop(IMessageSession session) => Task.CompletedTask;
     }
 }

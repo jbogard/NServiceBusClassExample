@@ -1,44 +1,45 @@
 ﻿using Billing.Events;
 using NServiceBus.Logging;
-using NServiceBus.Saga;
 using Sales.Events;
+using System.Threading.Tasks;
+using NServiceBus.Persistence.Sql;
 
 namespace Shipping
 {
     using NServiceBus;
 
     public class ShippingSaga
-        : Saga<ShippingSagaData>,
+        : SqlSaga<ShippingSaga.SagaData>,
         IAmStartedByMessages<OrderAccepted>,
         IAmStartedByMessages<OrderBilled>
     {
-        protected override void ConfigureHowToFindSaga(
-            SagaPropertyMapper<ShippingSagaData> mapper)
+        protected override void ConfigureMapping(IMessagePropertyMapper mapper)
         {
-            mapper.ConfigureMapping<OrderAccepted>(m => m.OrderId)
-                .ToSaga(s => s.OrderId);
-            mapper.ConfigureMapping<OrderBilled>(m => m.OrderId)
-                .ToSaga(s => s.OrderId);
+            mapper.ConfigureMapping<OrderAccepted>(m => m.OrderId);
+            mapper.ConfigureMapping<OrderBilled>(m => m.OrderId);
         }
 
-        public void Handle(OrderAccepted message)
+        protected override string CorrelationPropertyName => nameof(SagaData.OrderId);
+
+        public Task Handle(OrderAccepted message, IMessageHandlerContext context)
         {
             LogManager.GetLogger(typeof(ShippingSaga))
                 .Info("Received Order Accepted: " + message.OrderId);
 
-            Data.OrderId = message.OrderId;
             Data.OrderAccepted = true;
             CheckIfComplete();
+
+            return Task.CompletedTask;
         }
 
-        public void Handle(OrderBilled message)
+        public Task Handle(OrderBilled message, IMessageHandlerContext context)
         {
             LogManager.GetLogger(typeof(ShippingSaga))
                 .Info("Received Order Billed: " + message.OrderId);
 
-            Data.OrderId = message.OrderId;
             Data.OrderBilled = true;
             CheckIfComplete();
+            return Task.CompletedTask;
         }
 
         private void CheckIfComplete()
@@ -50,5 +51,13 @@ namespace Shipping
                 MarkAsComplete();
             }
         }
+
+        public class SagaData : ContainSagaData
+        {
+            public int OrderId { get; set; }
+            public bool OrderAccepted { get; set; }
+            public bool OrderBilled { get; set; }
+        }
+
     }
 }

@@ -1,20 +1,17 @@
-
-
+using System.Data.SqlClient;
+using NServiceBus.Persistence.Sql;
 
 namespace Crm
 {
     using NServiceBus;
-    using NServiceBus.Persistence;
 
-    /*
-		This class configures this endpoint as a Server. More information about how to configure the NServiceBus host
-		can be found here: http://nservicebus.com/GenericHost.aspx
-	*/
-	public class EndpointConfig : IConfigureThisEndpoint, AsA_Server
+    public class EndpointConfig : IConfigureThisEndpoint, AsA_Server
     {
-	    public void Customize(BusConfiguration configuration)
-	    {
-            configuration.UsePersistence<RavenDBPersistence>();
+        public void Customize(EndpointConfiguration configuration)
+        {
+            configuration.UsePersistence<SqlPersistence>()
+                .ConnectionBuilder(() => new SqlConnection(@"Data Source=.\SqlExpress;Initial Catalog=NServiceBusClassExample;Integrated Security=True"));
+            configuration.UseTransport<RabbitMQTransport>().ConnectionString("host=localhost");
         }
     }
 }
