@@ -11,7 +11,9 @@ namespace Crm
         {
             configuration.UsePersistence<SqlPersistence>()
                 .ConnectionBuilder(() => new SqlConnection(@"Data Source=.\SqlExpress;Initial Catalog=NServiceBusClassExample;Integrated Security=True"));
-            configuration.UseTransport<RabbitMQTransport>().ConnectionString("host=localhost");
+            configuration
+                .UseTransport<RabbitMQTransport>()
+                .ConnectionString("host=localhost");
         }
     }
 }
